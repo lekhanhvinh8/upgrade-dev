@@ -41,12 +41,13 @@ namespace OrderServiceQuery.Infrastructure.Registrations
             {
                 Console.WriteLine("environment variable not defined: ASPNETCORE_ENVIRONMENT Is null or empty");
             }
-            environment = "local";
+
+            
             var pathFile = "";
 
             if(environment == "local")
             {
-                pathFile = "C:/vinh/projects/upgrade-dev-infras/vault/output/secret.json";
+                pathFile = "C:/projects/upgrade-dev-ftel-project/infras/vault/output/secret.json";
             }
             else
             {

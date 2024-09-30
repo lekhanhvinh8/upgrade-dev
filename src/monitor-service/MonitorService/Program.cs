@@ -36,7 +36,7 @@ builder.Services.AddHealthChecks()
 
 builder.Services.AddTransient<IHealthCheckCollectorInterceptor, ControlledHealthCheckCollectorInterceptor>();
 
-var healthCheckUIConfig = AddSecretVaultExtension.VaultConfiguration!.GetSection("HealthChecksUI").Get<HealthChecksUI>();
+var healthCheckUIConfig = AddSecretVaultExtension.VaultConfiguration!.GetSection("monitorService:HealthChecksUI").Get<HealthChecksUI>();
 
 builder.Services.AddHealthChecksUI(setup =>
 {

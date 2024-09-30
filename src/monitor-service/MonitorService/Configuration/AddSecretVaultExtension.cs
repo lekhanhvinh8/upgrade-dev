@@ -11,10 +11,8 @@ namespace MonitorService.Configurations
                 var vaultConfiguration = GetVaultConfiguration();
                 Console.WriteLine("vaultConfiguration: " + vaultConfiguration.GetDebugView());
 
-                services.Configure<HealthChecksUI>(vaultConfiguration.GetSection("HealthChecksUI"));
-                services.Configure<HealthCheckController>(vaultConfiguration.GetSection("HealthCheckController"));
-
-
+                services.Configure<HealthChecksUI>(vaultConfiguration.GetSection("monitorService:HealthChecksUI"));
+                services.Configure<HealthCheckController>(vaultConfiguration.GetSection("monitorService:HealthCheckController"));
             }
             catch (Exception ex)
             {

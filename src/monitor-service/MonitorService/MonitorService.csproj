@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <AssemblyName>fpl-monitor-service</AssemblyName>
+    <AssemblyName>monitor-service</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
