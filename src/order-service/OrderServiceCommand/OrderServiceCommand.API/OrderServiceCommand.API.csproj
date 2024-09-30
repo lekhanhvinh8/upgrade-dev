@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>order_service</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+  
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderServiceCommand.Core\OrderServiceCommand.Core.csproj" />
+    <ProjectReference Include="..\OrderServiceCommand.Infrastructure\OrderServiceCommand.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
