@@ -20,11 +20,11 @@ namespace OrderServiceQuery.Infrastructure.Consumer
         {
             _logger.LogInformation("Event Consumer Service running.");
 
-            Task.Run(() => {
+            Task.Run(async () => {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
                     var eventConsumer = scope.ServiceProvider.GetRequiredService<IEventConsumer>();
-                    eventConsumer.Consume("OrderEventSourcing");
+                    await eventConsumer.Consume("OrderEventSourcing");
                 }
             });
 

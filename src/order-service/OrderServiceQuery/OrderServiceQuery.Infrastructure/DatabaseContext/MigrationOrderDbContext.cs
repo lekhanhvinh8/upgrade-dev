@@ -7,20 +7,12 @@ using OrderServiceQuery.Core.Repositories;
 
 namespace OrderServiceQuery.Infrastructure.DatabaseContext
 {
-    public class MigrationOrderDbContext : DbContext
+    public class MigrationOrderDbContext : OrderDbContext<ReadSide>
     {
-        public DbSet<Order> Orders { get; set; }
-
-        public MigrationOrderDbContext(DbContextOptions<MigrationOrderDbContext> options)
+        public MigrationOrderDbContext(DbContextOptions<OrderDbContext<ReadSide>> options)
             :base(options)
         {
         }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-
-            builder.Entity<Order>().ToTable("Order");
-        }
+       
     }
 }

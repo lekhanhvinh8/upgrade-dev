@@ -5,6 +5,7 @@ using OrderServiceQuery.Core.Commands;
 using OrderServiceQuery.Core.Event;
 using OrderServiceQuery.Core.Repositories;
 using OrderServiceQuery.Core.Resources.CreateOrder;
+using OrderServiceQuery.Infrastructure.UnitOfWork;
 
 namespace OrderServiceQuery.API.Controllers.OrderController
 {
@@ -12,28 +13,20 @@ namespace OrderServiceQuery.API.Controllers.OrderController
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly ICommandDispatcher _commandDispatcher;
-        public OrderController(ICommandDispatcher commandDispatcher)
+        private readonly IAppUnitOfWork<ReadSide> _repository;
+        private readonly IAppUnitOfWork<WriteSide> _unitOfWork;
+        public OrderController(IAppUnitOfWork<ReadSide> repository, IAppUnitOfWork<WriteSide> unitOfWork)
         {
-            _commandDispatcher = commandDispatcher;
+            _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
-        [HttpPost]
-        [Route("CreateOrder")]
-        public async Task<IActionResult> CreateOrder(CreateOrderRequest request)
+        [HttpGet]
+        [Route("GetOrder")]
+        public async Task<IActionResult> GetOrder(int orderId)
         {
-            var result = await _commandDispatcher.Dispatch<CreateOrderCommand, int>(new CreateOrderCommand(request), CancellationToken.None);
+            var result = await _repository.Orders.GetOrderByOrderIdAsync(orderId);
             return Ok(result);
         }
-
-        [HttpPost]
-        [Route("UpdateOrder")]
-        public async Task<IActionResult> UpdateOrder(UpdateOrderRequest request)
-        {
-            var result = await _commandDispatcher.Dispatch<UpdateOrderCommand, int>(new UpdateOrderCommand(request), CancellationToken.None);
-            return Ok(result);
-        }
-
-        
     }
 }

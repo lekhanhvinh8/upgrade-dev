@@ -11,17 +11,17 @@ namespace OrderServiceQuery.Infrastructure.Registrations
         public static ConnectionStrings? ConnectionStrings;
         public static IServiceCollection RegisterConfigurationValue(this IServiceCollection services)
         {
-            
             try
             {
                 var vaultConfiguration = GetVaultConfiguration();
                 Console.WriteLine("vaultConfiguration: " + vaultConfiguration.GetDebugView());
 
-                services.Configure<ConsumerConfig>(vaultConfiguration.GetSection("orderServiceQuery:ConsumerConfig"));
-
                 var connectionStringSection = vaultConfiguration.GetSection("orderServiceQuery:ConnectionStrings");
                 ConnectionStrings = connectionStringSection.Get<ConnectionStrings>();
                 services.Configure<ConnectionStrings>(connectionStringSection);
+
+                var consumerConfigSection = vaultConfiguration.GetSection("orderServiceQuery:ConsumerConfig");
+                services.Configure<ConsumerConfig>(consumerConfigSection);
             }
             catch (Exception ex)
             {
@@ -41,12 +41,12 @@ namespace OrderServiceQuery.Infrastructure.Registrations
             {
                 Console.WriteLine("environment variable not defined: ASPNETCORE_ENVIRONMENT Is null or empty");
             }
-
+            environment = "local";
             var pathFile = "";
 
             if(environment == "local")
             {
-                pathFile = "C:/projects/upgrade-dev-ftel-project/infras/vault/output/secret.json";
+                pathFile = "C:/vinh/projects/upgrade-dev-infras/vault/output/secret.json";
             }
             else
             {

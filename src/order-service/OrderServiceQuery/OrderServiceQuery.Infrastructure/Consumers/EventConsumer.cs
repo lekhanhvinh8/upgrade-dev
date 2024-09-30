@@ -1,11 +1,15 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using OrderServiceQuery.Core.Consumers;
 using OrderServiceQuery.Core.Event;
 using OrderServiceQuery.Core.EventHandler;
 using OrderServiceQuery.Infrastructure.Converters;
+using Serilog;
 
 namespace OrderServiceQuery.Infrastructure.Consumers
 {
@@ -13,15 +17,18 @@ namespace OrderServiceQuery.Infrastructure.Consumers
     {
         private readonly ConsumerConfig _config;
         private readonly IServiceProvider _serviceProvider;
+        private readonly TracerProvider _tracerProvider;
         public EventConsumer(
             IOptions<ConsumerConfig> config,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            TracerProvider tracerProvider)
         {
             _config = config.Value;
             _serviceProvider = serviceProvider;
+            _tracerProvider = tracerProvider;
         }
 
-        public void Consume(string topic)
+        public async Task Consume(string topic)
         {
             using var consumer = new ConsumerBuilder<string, string>(_config)
                     .SetKeyDeserializer(Deserializers.Utf8)
@@ -33,22 +40,31 @@ namespace OrderServiceQuery.Infrastructure.Consumers
             while (true)
             {
                 var consumeResult = consumer.Consume();
-
                 if (consumeResult?.Message == null) continue;
 
-                var options = new JsonSerializerOptions { Converters = { new EventJsonConverter() } };
-                var @event = JsonSerializer.Deserialize<BaseEvent>(consumeResult.Message.Value, options);
-
-                if(@event != null)
+                var activitySource = new ActivitySource("ConsumeProcess");
+                using (var myActivity = activitySource.StartActivity("HandleMessage"))
                 {
-                    var eventType = @event.GetType();
-                    Type handlerType = typeof(IEventHandler<>).MakeGenericType(eventType);
-                    var handler = _serviceProvider.GetRequiredService(handlerType);
-                    var onMethod = handlerType.GetMethod("On");
-                    onMethod!.Invoke(handler, new object[] { @event });
+                    Log.Information($"Consumed message '{consumeResult.Message.Value}' at: '{consumeResult.TopicPartitionOffset}'.");
+
+                    var options = new JsonSerializerOptions { Converters = { new EventJsonConverter() } };
+                    var @event = JsonSerializer.Deserialize<BaseEvent>(consumeResult.Message.Value, options);
+
+                    if(@event != null)
+                    {
+                        var eventType = @event.GetType();
+                        Type handlerType = typeof(IEventHandler<>).MakeGenericType(eventType);
+                        var handler = _serviceProvider.GetRequiredService(handlerType);
+                        var onMethod = handlerType.GetMethod("On");
+                        var task = (Task?)onMethod!.Invoke(handler, new object[] { @event });
+                        if(task != null)
+                        {
+                            await task;
+                        }
+                    }
+                    
+                    consumer.Commit(consumeResult);
                 }
-                
-                consumer.Commit(consumeResult);
             }
         }
     }

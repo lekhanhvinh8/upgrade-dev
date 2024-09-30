@@ -13,6 +13,7 @@ namespace OrderServiceQuery.Infrastructure.Registrations
         {
             services.AddScoped<IOrderRepository<ReadSide>, OrderRepository<ReadSide>>();
             services.AddScoped<IOrderRepository<WriteSide>, OrderRepository<WriteSide>>();
+            services.Decorate<IOrderRepository<ReadSide>, CacheOrderRepository>();
 
             services.AddScoped<IAppUnitOfWork<ReadSide>, AppUnitOfWork<ReadSide>>();
             services.AddScoped<IAppUnitOfWork<WriteSide>, AppUnitOfWork<WriteSide>>();

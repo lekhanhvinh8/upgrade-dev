@@ -16,6 +16,8 @@ builder.Services.RegisterMongoDb();
 builder.Services.RegisterCommands();
 builder.Services.RegisterRepository();
 builder.Services.RegisterEventSourcing();
+builder.Services.RegsiterObservability(RegisterConfigurationValueExtension.ConnectionStrings!.Otel!);
+builder.Services.RegisterLogging(new KafkaLoggingConfig() { BootstrapServers = RegisterConfigurationValueExtension.ConnectionStrings.BootstrapServers!, Topic = "log_topic" }, RegisterConfigurationValueExtension.ConnectionStrings!.Otel!);
 builder.Services.AddScoped<IEventProducer, EventProducer>();
 
 // Add services to the container.

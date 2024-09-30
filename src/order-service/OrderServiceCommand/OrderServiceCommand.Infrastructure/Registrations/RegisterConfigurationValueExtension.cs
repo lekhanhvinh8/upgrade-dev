@@ -8,6 +8,8 @@ namespace OrderServiceCommand.Infrastructure.Registrations
 {
     public static class RegisterConfigurationValueExtension
     {
+        public static ConnectionStrings? ConnectionStrings;
+
         public static IServiceCollection RegisterConfigurationValue(this IServiceCollection services)
         {
             
@@ -17,8 +19,13 @@ namespace OrderServiceCommand.Infrastructure.Registrations
                 Console.WriteLine("vaultConfiguration: " + vaultConfiguration.GetDebugView());
 
                 services.Configure<MongoDbConfig>(vaultConfiguration.GetSection("orderServiceCommand:mongoDbConfig"));
-                services.Configure<ProducerConfig>(vaultConfiguration.GetSection("orderServiceCommand:ProducerConfig"));
 
+                var connectionStringSection = vaultConfiguration.GetSection("orderServiceCommand:ConnectionStrings");
+                ConnectionStrings = connectionStringSection.Get<ConnectionStrings>();
+                services.Configure<ConnectionStrings>(connectionStringSection);
+
+                var producerConfigSection = vaultConfiguration.GetSection("orderServiceCommand:ProducerConfig");
+                services.Configure<ProducerConfig>(producerConfigSection);
             }
             catch (Exception ex)
             {
@@ -44,7 +51,7 @@ namespace OrderServiceCommand.Infrastructure.Registrations
 
             if(environment == "local")
             {
-                pathFile = "C:/projects/upgrade-dev-ftel-project/infras/vault/output/secret.json";
+                pathFile = "C:/vinh/projects/upgrade-dev-infras/vault/output/secret.json";
             }
             else
             {

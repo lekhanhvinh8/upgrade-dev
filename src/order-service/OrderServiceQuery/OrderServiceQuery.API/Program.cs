@@ -1,8 +1,7 @@
 
 using HealthChecks.UI.Client;
-using MassTransit;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using OrderServiceQuery.API.Events;
+using OrderServiceCommand.Infrastructure.Registrations;
 using OrderServiceQuery.Core.Consumers;
 using OrderServiceQuery.Core.Producer;
 using OrderServiceQuery.Infrastructure.Consumer;
@@ -21,6 +20,9 @@ builder.Services.RegisterConfigurationValue();
 builder.Services.RegisterAppDbContext();
 builder.Services.RegisterEventHandler();
 builder.Services.RegisterRepository();
+builder.Services.RegisterCaching();
+builder.Services.RegsiterObservability(RegisterConfigurationValueExtension.ConnectionStrings!.Otel!);
+builder.Services.RegisterLogging(new KafkaLoggingConfig() { BootstrapServers = RegisterConfigurationValueExtension.ConnectionStrings.BootstrapServers!, Topic = "log_topic" }, RegisterConfigurationValueExtension.ConnectionStrings!.Otel!);
 builder.Services.AddScoped<IEventProducer, EventProducer>();
 
 // Add services to the container.
@@ -28,19 +30,19 @@ builder.Services.AddScoped<IEventProducer, EventProducer>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddMassTransit(x =>
-{
-    x.UsingInMemory();
-    x.AddRider(rider =>
-    {
-        rider.AddProducer<OrderPlaced>("order-placed");
-        rider.UsingKafka((context, k) =>
-        {
-            k.Host("localhost:9092");
-        });
-    });
+// builder.Services.AddMassTransit(x =>
+// {
+//     x.UsingInMemory();
+//     x.AddRider(rider =>
+//     {
+//         rider.AddProducer<OrderPlaced>("order-placed");
+//         rider.UsingKafka((context, k) =>
+//         {
+//             k.Host("localhost:9092");
+//         });
+//     });
 
-});
+// });
 
 builder.Services.AddHealthChecks();
 
