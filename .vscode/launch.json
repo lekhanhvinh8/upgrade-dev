@@ -1,0 +1,103 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Run All Projects",
+            "configurations": [
+                "iam-service",
+                "monitor-service",
+                "order-service-command",
+                "order-service-query",
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "name": "iam-service",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-iam-service",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/iam-service/bin/Debug/net8.0/iam-service.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/iam-service",
+            "stopAtEntry": false,
+         
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Local"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+          
+            "name": "monitor-service",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-monitor-service",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/monitor-service/MonitorService/bin/Debug/net6.0/monitor-service.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/monitor-service/MonitorService",
+            "stopAtEntry": false,
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Local"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+          
+            "name": "order-service-command",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-order-service-command",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/order-service/OrderServiceCommand/OrderServiceCommand.API/bin/Debug/net8.0/OrderServiceCommand.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/order-service/OrderServiceCommand/OrderServiceCommand.API",
+            "stopAtEntry": false,
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Local"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "order-service-query",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-order-service-query",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/order-service/OrderServiceQuery/OrderServiceQuery.API/bin/Debug/net8.0/OrderServiceQuery.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/order-service/OrderServiceQuery/OrderServiceQuery.API",
+            "stopAtEntry": false,
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Local"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+
+
+        
+        
+    ]
+}

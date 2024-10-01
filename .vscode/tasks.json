@@ -1,0 +1,74 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-iam-service",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+              "build",
+              "${workspaceFolder}/src/iam-service/iam-service.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build-monitor-service",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+              "build",
+              "${workspaceFolder}/src/monitor-service/monitor-service.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build-order-service-command",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+              "build",
+              "${workspaceFolder}/src/order-service/OrderServiceCommand/OrderServiceCommand.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build-order-service-query",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+              "build",
+              "${workspaceFolder}/src/order-service/OrderServiceQuery/OrderServiceQuery.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build All Projects",
+            "dependsOn": [
+                "build-iam-service",
+                "build-monitor-service",
+                "build-order-service-command",
+                "build-monitor-service-query"
+            ],
+            "group": {
+              "kind": "build",
+              "isDefault": true
+            }
+        }
+    ],
+}
