@@ -1,15 +1,28 @@
 
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using OrderServiceCommand.Infrastructure.Registrations;
 using OrderServiceQuery.Core.Consumers;
 using OrderServiceQuery.Core.Producer;
 using OrderServiceQuery.Infrastructure.Consumer;
 using OrderServiceQuery.Infrastructure.Consumers;
+using OrderServiceQuery.Infrastructure.Middlewares;
 using OrderServiceQuery.Infrastructure.Producers;
 using OrderServiceQuery.Infrastructure.Registrations;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApiVersioning(options =>
+        {
+            // Specify how to version the API
+            options.AssumeDefaultVersionWhenUnspecified = true; // Use this version when no version is specified
+            options.DefaultApiVersion = new ApiVersion(1, 0); // Default version
+            options.ReportApiVersions = true; // Include API version in response headers
+            //options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version"); // Read version from header
+            options.ApiVersionReader = new MediaTypeApiVersionReader("version");
+        });
 
 builder.Services.AddControllers();
 
@@ -23,6 +36,7 @@ builder.Services.RegisterRepository();
 builder.Services.RegisterCaching();
 builder.Services.RegsiterObservability(RegisterConfigurationValueExtension.ConnectionStrings!.Otel!);
 builder.Services.RegisterLogging(new KafkaLoggingConfig() { BootstrapServers = RegisterConfigurationValueExtension.ConnectionStrings.BootstrapServers!, Topic = "log_topic" }, RegisterConfigurationValueExtension.ConnectionStrings!.Otel!);
+builder.Services.RegisterAuthentication();
 builder.Services.AddScoped<IEventProducer, EventProducer>();
 
 // Add services to the container.
@@ -48,6 +62,8 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+app.UseMiddleware<UnhandledExceptionLoggingMiddleware>();
+
 app.UseRouting();
 
 // Configure the HTTP request pipeline.
@@ -66,6 +82,11 @@ app.MapHealthChecks("/hc", new HealthCheckOptions()
     Predicate = _ => true,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 }).AllowAnonymous();
+
+app.UseAuthorization();
+
+
+
 
 
 app.Run();
