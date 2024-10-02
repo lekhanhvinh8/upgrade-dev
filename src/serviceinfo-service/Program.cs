@@ -1,7 +1,10 @@
-using Confluent.Kafka;
-using MassTransit;
-using ServiceInfoService.Consumer;
-using ServiceInfoService.Events;
+using System.Threading.RateLimiting;
+using FluentValidation;
+using Polly;
+using Polly.Extensions.Http;
+using ServiceInfoService.Sevices.Http;
+using ServiceInfoService.Sevices.IAM;
+using static OrderServiceQuery.API.Controllers.OrderController.ServiceInfoController;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,44 +13,70 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddControllers();
 
-builder.Services.AddMassTransit(x =>
-{
-    x.UsingInMemory();
-    x.AddRider(rider =>
+builder.Services.AddScoped<IValidator<Input>, UserValidator>();
+
+// Define the circuit breaker policy
+var circuitBreakerPolicy = 
+
+
+builder.Services.AddHttpClient<IHttpService, HttpService>()
+    .ConfigureHttpClient(client =>
     {
-        rider.AddConsumer<OrderPlacedConsumer>();
+        client.Timeout = TimeSpan.FromSeconds(30); // Set a timeout
+    })
+    .AddPolicyHandler(
+        HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.BadGateway)
+        .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(0.5)) 
+    )
+    .AddPolicyHandler(
+        HttpPolicyExtensions
+        .HandleTransientHttpError() // Handles transient errors
+        .CircuitBreakerAsync(
+            handledEventsAllowedBeforeBreaking: 3, // Break after 2 consecutive errors
+            durationOfBreak: TimeSpan.FromSeconds(20))
+    ); // Add circuit breaker policy;
 
-        rider.UsingKafka((context, cfg) =>
-        {
-            cfg.Host("localhost:9092"); // Kafka broker address
+builder.Services.AddScoped<IIAMService, IAMService>();
 
-            // Define the topic and consumer group for subscribing to OrderPlaced events
-            cfg.TopicEndpoint<OrderPlaced>("order-placed", "serviceinfo-group", e =>
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
             {
-                e.ConfigureConsumer<OrderPlacedConsumer>(context);
+                PermitLimit = 60, // Maximum number of requests allowed
+                Window = TimeSpan.FromMinutes(1), // Time window (e.g., 1 minute)
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0 // Number of requests allowed to be queued
+            }));
 
-                // var date = new DateTime(2024, 9, 8, 12, 48, 0);
-                // var utcDate = date.ToUniversalTime();
-                // var offset = KafkaHelper.GetOffsetForTimestamp("order-placed", date);
-                // var offsetValue = offset.Value;
-                // e.Offset = offsetValue;
-
-                //16. Kiểm tra các trường hợp nếu có sự cố lỗi kafka, thời gian reconnect --> Consume fail, reconnect in specific time
-            });
-        });
-    });
-
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsync("Rate limit exceeded. Please try again later.", cancellationToken);
+    };
 });
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local")
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRouting();
+
+app.UseRateLimiter();
+
+app.MapControllers();
 
 app.Run();
 

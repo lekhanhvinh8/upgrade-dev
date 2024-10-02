@@ -8,6 +8,7 @@
                 "monitor-service",
                 "order-service-command",
                 "order-service-query",
+                "serviceinfo-service"
             ]
         }
     ],
@@ -95,9 +96,24 @@
                 "/Views": "${workspaceFolder}/Views"
             }
         },
-
-
-        
+        {
+            "name": "serviceinfo-service",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-serviceinfo-service",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/serviceinfo-service/bin/Debug/net8.0/serviceinfo-service.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/serviceinfo-service",
+            "stopAtEntry": false,
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Local"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
         
     ]
 }

@@ -58,17 +58,33 @@
             }
         },
         {
+            "label": "build-serviceinfo-service",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+              "build",
+              "${workspaceFolder}/src/serviceinfo-service/serviceinfo-service.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "Build All Projects",
             "dependsOn": [
                 "build-iam-service",
                 "build-monitor-service",
                 "build-order-service-command",
-                "build-monitor-service-query"
+                "build-monitor-service-query",
+                "build-serviceinfo-service"
             ],
             "group": {
               "kind": "build",
               "isDefault": true
             }
         }
+       
     ],
 }

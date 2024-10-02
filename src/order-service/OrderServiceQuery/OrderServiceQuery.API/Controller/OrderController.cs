@@ -88,7 +88,23 @@ namespace OrderServiceQuery.API.Controllers.OrderController
             return Ok(new StandardResponse() {Data = new {jsonObject = obj, ExcelRows = excelRows, now = CommonHelper.ToIso8601(DateTime.Now)}});
         }
 
-       
+        [HttpPost]
+        [Route("Unstable")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Unstable()
+        {
+            Random _random = new Random();
+            double randomValue = _random.NextDouble();
+
+            // 80% chance to return 502
+            if (randomValue < 0.8)
+            {
+                return StatusCode(502, "Bad Gateway");
+            }
+
+            // Otherwise, return normal response
+            return Ok("Data successfully retrieved");
+        }
 
         private class TestObject
         {
