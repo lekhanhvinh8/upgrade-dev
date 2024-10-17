@@ -1,4 +1,5 @@
 ﻿using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace identityserver4_ef_template;
 
@@ -28,7 +29,7 @@ public static class Config
                 ClientName = "Client Credentials Client",
 
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
-                ClientSecrets = { new Secret("511536EF-F270-4058-80CA-1C89C192F69A".Sha256()) },
+                ClientSecrets = { new Secret("secret".Sha256()) },
 
                 AllowedScopes = { "scope1" }
             },
@@ -37,7 +38,7 @@ public static class Config
             new Client
             {
                 ClientId = "interactive",
-                ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
+                ClientSecrets = { new Secret("secret".Sha256()) },
 
                 AllowedGrantTypes = GrantTypes.Code,
 
@@ -74,5 +75,17 @@ public static class Config
                 AlwaysIncludeUserClaimsInIdToken = true,
                 RequirePkce = false,  // Required for code flow
             }
+        };
+
+
+    public static IEnumerable<IdentityUser> Users =>
+        new IdentityUser[]
+        {
+            new IdentityUser() 
+            {
+                UserName = "admin",
+                Email = "admin@gmail.com",
+            }
+     
         };
 }

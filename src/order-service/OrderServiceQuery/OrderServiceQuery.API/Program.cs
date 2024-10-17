@@ -1,5 +1,6 @@
 
 using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -59,6 +60,14 @@ builder.Services.AddSwaggerGen();
 // });
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes("Bearer1", "Bearer2") // Specify both schemes
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 

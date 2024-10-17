@@ -3,20 +3,40 @@ using Serilog;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Models;
+using IAMService;
+using Microsoft.AspNetCore.Identity;
 
 namespace identityserver4_ef_template;
 
 public class SeedData
 {
-    public static void EnsureSeedData(WebApplication app)
+    public static async void EnsureSeedData(WebApplication app)
     {
         using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
         {
-            scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+            var configurationDbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+            var persistedGrantDbContext = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>();
+            var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-            context.Database.Migrate();
-            EnsureSeedData(context);
+            if (configurationDbContext.Database.GetPendingMigrations().Any())
+            {
+                configurationDbContext.Database.Migrate();
+            }
+
+            if(persistedGrantDbContext.Database.GetPendingMigrations().Any())
+            {
+                persistedGrantDbContext.Database.Migrate();
+            }
+
+            if(applicationDbContext.Database.GetPendingMigrations().Any())
+            {
+                applicationDbContext.Database.Migrate();
+            }
+
+            EnsureSeedData(configurationDbContext);
+
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            await EnsureSeedData(applicationDbContext, userManager);
         }
     }
 
@@ -80,5 +100,27 @@ public class SeedData
         {
             Log.Debug("OIDC IdentityProviders already populated");
         }
+    }
+
+    private static async Task EnsureSeedData(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    {
+        if (!context.Users.Any())
+        {
+            Log.Debug("Users being populated");
+            foreach (var user in Config.Users.ToList())
+            {
+                var result = await userManager.CreateAsync(user, "A123456a!");
+
+                if (result.Succeeded)
+                {
+                    Log.Debug($"Users {user.UserName} populated successfully");
+                }
+            }
+        }
+        else
+        {
+            Log.Debug("Clients already populated");
+        }
+        
     }
 }

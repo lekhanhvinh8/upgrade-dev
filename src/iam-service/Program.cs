@@ -40,4 +40,6 @@ if (args.Contains("/seed"))
     return;
 }
 
+SeedData.EnsureSeedData(app);
+
 app.Run();

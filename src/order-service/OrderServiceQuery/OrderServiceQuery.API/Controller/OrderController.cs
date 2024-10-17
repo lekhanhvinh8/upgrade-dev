@@ -71,6 +71,30 @@ namespace OrderServiceQuery.API.Controllers.OrderController
         }
 
         [HttpGet]
+        [Route("AuthenWithJwtBearerOrAPIKey1")]
+        [Authorize(AuthenticationSchemes = "ApiKey1, Bearer")]
+        public async Task<IActionResult> AuthenWithJwtBearerOrAPIKey1()
+        {
+            return Ok("Ok");
+        }
+
+        [HttpGet]
+        [Route("AuthenWithBearer1OrBearer2")]
+        [Authorize(AuthenticationSchemes = "Bearer2, Bearer1")]
+
+        public async Task<IActionResult> AuthenWithBearer1OrBearer2()
+        {
+            return Ok("Ok");
+        }
+
+        [HttpGet]
+        [Route("AuthenWithFallBackPolicy")]
+        public async Task<IActionResult> AuthenWithFallBackPolicy()
+        {
+            return Ok("Ok");
+        }
+
+        [HttpGet]
         [Route("TestGlobalExceptionHandle")]
         public async Task<IActionResult> TestGlobalExceptionHandle()
         {
